@@ -1,3 +1,9 @@
+var socket = io('localhost:8080');
+
+socket.on('connect', function () {
+	console.log('connected to whiteboard server');
+});
+
 var path;
 
 function onMouseDown(e) {
