@@ -1,5 +1,12 @@
+var path;
+
 function onMouseDown(e) {
-	console.log('mousedown');
-	var path = new Path();
+	console.log(path);
+	path = new Path();
+	path.strokeColor = $('#colorSelector').val();
+	path.add(e.point);
+}
+
+function onMouseDrag(e) {
 	path.add(e.point);
 }
