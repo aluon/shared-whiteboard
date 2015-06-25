@@ -1,0 +1,30 @@
+{
+  "name": "shared-whiteboard",
+  "version": "1.0.0",
+  "description": "An HTML canvas whiteboard for collaborative drawing",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/alanluong/shared-whiteboard.git"
+  },
+  "keywords": [
+    "whiteboard",
+    "canvas",
+    "websockets",
+    "socket.io",
+    "collaborative",
+    "drawing"
+  ],
+  "author": "Alan Luong",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/alanluong/shared-whiteboard/issues"
+  },
+  "homepage": "https://github.com/alanluong/shared-whiteboard#readme",
+  "dependencies": {
+    "express": "^4.13.0"
+  }
+}
