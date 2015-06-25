@@ -1,9 +1,14 @@
 var path;
 
 function onMouseDown(e) {
-	console.log(path);
 	path = new Path();
-	path.strokeColor = $('#colorSelector').val();
+	if ($('#toolSelector').val() === "brush") {
+		path.strokeColor = $('#colorSelector').val();
+	} else {
+		path.strokeColor = '#FFFFFF';
+	}
+	path.strokeWidth = $('#widthSelector').val();
+	path.strokeCap = 'round';
 	path.add(e.point);
 }
 
