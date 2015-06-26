@@ -1,4 +1,4 @@
-var socket = io('localhost:8080');
+var socket = io('http://localhost:8080');
 
 tool.minDistance = 10;
 
@@ -16,12 +16,18 @@ socket.on('drawUpdate', function(points) {
 	for (var i = 0; i < points.length; ++i) {
 		foreignPath.add(new Point(points[i]));
 	}
-	view.draw();
+	view.update();
 });
 
 var path;
 var updatePoints = [];
 var updateTimer;
+
+function sendUpdatePoints() {
+	if (!updatePoints.length) return;
+	socket.emit('drawUpdate', updatePoints);
+	updatePoints = [];
+}
 
 function onMouseDown(e) {
 	path = new Path();
@@ -36,11 +42,7 @@ function onMouseDown(e) {
 	path.smooth();
 
 	socket.emit('drawStart', path);
-
-	updateTimer = setInterval(function () {
-		socket.emit('drawUpdate', updatePoints);
-		updatePoints = [];
-	}, 10);
+	updateTimer = setInterval(sendUpdatePoints, 10);
 }
 
 function onMouseDrag(e) {
@@ -51,4 +53,5 @@ function onMouseDrag(e) {
 
 function onMouseUp(e) {
 	clearInterval(updateTimer);
+	sendUpdatePoints();
 }
