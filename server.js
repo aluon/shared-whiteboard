@@ -4,11 +4,12 @@ app.use(express.static('public'));
 
 var server = app.listen(8080);
 
-var paths = [];
+var paths = {};
 
 var io = require('socket.io').listen(server);
 io.on('connection', function (socket) {
-	console.log('client connected');
+	var room = socket.id;
+	console.log('client connected to room %s', room);
 
 	socket.on('drawStart', function (path) {
 		socket.broadcast.emit('drawStart', path);
@@ -18,11 +19,18 @@ io.on('connection', function (socket) {
 		socket.broadcast.emit('drawUpdate', path);
 	});
 
-	socket.on('drawFinish', function(path) {
-		paths.push(path);
+	socket.on('drawFinish', function (path) {
+		paths[room] = paths[room] || [];
+		paths[room].push(path);
 	});
 
-	socket.on('pathsNeeded', function(fn) {
-		fn(paths);
+	socket.on('pathsNeeded', function (fn) {
+		console.log(paths[room]);
+		fn(paths[room]);
+	});
+
+	socket.on('joinRoom', function (id) {
+		room = id || socket.id;
+		socket.join(room);
 	});
 });
