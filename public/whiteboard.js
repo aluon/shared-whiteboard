@@ -20,7 +20,7 @@ socket.on('drawStart', function (path) {
 	foreignPath = new Path().importJSON(path);
 });
 
-socket.on('drawUpdate', function(points) {
+socket.on('drawUpdate', function (points) {
 	for (var i = 0; i < points.length; ++i) {
 		foreignPath.add(new Point(points[i]));
 	}
@@ -36,6 +36,7 @@ function loadPaths(paths) {
 	for (var i = 0; i < paths.length; ++i) {
 		new Path().importJSON(paths[i]);
 	}
+	view.update();
 }
 
 function sendUpdatePoints() {

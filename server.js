@@ -12,11 +12,11 @@ io.on('connection', function (socket) {
 	console.log('client connected to room %s', room);
 
 	socket.on('drawStart', function (path) {
-		socket.broadcast.emit('drawStart', path);
+		socket.broadcast.to(room).emit('drawStart', path);
 	});
 
 	socket.on('drawUpdate', function (path) {
-		socket.broadcast.emit('drawUpdate', path);
+		socket.broadcast.to(room).emit('drawUpdate', path);
 	});
 
 	socket.on('drawFinish', function (path) {
