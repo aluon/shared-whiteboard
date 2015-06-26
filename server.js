@@ -24,9 +24,9 @@ io.on('connection', function (socket) {
 		paths[room].push(path);
 	});
 
-	socket.on('pathsNeeded', function (fn) {
+	socket.on('pathsNeeded', function () {
 		console.log(paths[room]);
-		fn(paths[room]);
+		socket.emit(paths[room]);
 	});
 
 	socket.on('joinRoom', function (id) {

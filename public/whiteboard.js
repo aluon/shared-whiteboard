@@ -4,14 +4,22 @@ tool.minDistance = 5;
 
 socket.on('connect', function () {
 	console.log('connected to whiteboard server');
-	socket.emit('pathsNeeded', loadPaths);
+	socket.emit('pathsNeeded');
 });
 
 $('#roomSelector').change(function () {
 	project.clear();
 	view.update();
 	socket.emit('joinRoom', this.value);
-	socket.emit('pathsNeeded', loadPaths);
+	socket.emit('pathsNeeded');
+});
+
+socket.on('pathsNeeded', function (paths) {
+	if (!paths) return;
+	for (var i = 0; i < paths.length; ++i) {
+		new Path().importJSON(paths[i]);
+	}
+	view.update();
 });
 
 var foreignPath;
@@ -31,13 +39,6 @@ var path;
 var updatePoints = [];
 var updateTimer;
 
-function loadPaths(paths) {
-	if (!paths) return;
-	for (var i = 0; i < paths.length; ++i) {
-		new Path().importJSON(paths[i]);
-	}
-	view.update();
-}
 
 function sendUpdatePoints() {
 	if (!updatePoints.length) return;
