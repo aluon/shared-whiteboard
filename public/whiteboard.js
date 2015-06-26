@@ -12,11 +12,16 @@ socket.on('drawStart', function (path) {
 	foreignPath = new Path().importJSON(path);
 });
 
-socket.on('drawUpdate', function(path) {
-	foreignPath = new Path().importJSON(path);
+socket.on('drawUpdate', function(points) {
+	for (var i = 0; i < points.length; ++i) {
+		foreignPath.add(new Point(points[i]));
+	}
+	view.draw();
 });
 
 var path;
+var updatePoints = [];
+var updateTimer;
 
 function onMouseDown(e) {
 	path = new Path();
@@ -31,11 +36,19 @@ function onMouseDown(e) {
 	path.smooth();
 
 	socket.emit('drawStart', path);
+
+	updateTimer = setInterval(function () {
+		socket.emit('drawUpdate', updatePoints);
+		updatePoints = [];
+	}, 10);
 }
 
 function onMouseDrag(e) {
 	path.add(e.point);
+	updatePoints.push([e.point.x, e.point.y]);
 	path.smooth();
+}
 
-	socket.emit('drawUpdate', path);
+function onMouseUp(e) {
+	clearInterval(updateTimer);
 }
