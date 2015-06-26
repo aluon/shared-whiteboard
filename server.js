@@ -30,6 +30,7 @@ io.on('connection', function (socket) {
 	});
 
 	socket.on('joinRoom', function (id) {
+		socket.leave(room);
 		room = id || socket.id;
 		socket.join(room);
 	});
