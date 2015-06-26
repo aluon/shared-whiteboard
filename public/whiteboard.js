@@ -1,9 +1,10 @@
 var socket = io('http://localhost:8080');
 
-tool.minDistance = 10;
+tool.minDistance = 5;
 
 socket.on('connect', function () {
 	console.log('connected to whiteboard server');
+	socket.emit('pathsNeeded', loadPath);
 });
 
 var foreignPath;
@@ -22,6 +23,13 @@ socket.on('drawUpdate', function(points) {
 var path;
 var updatePoints = [];
 var updateTimer;
+
+function loadPaths(paths) {
+	console.log(paths);
+	for (var i = 0; i < paths.length; ++i) {
+		new Path().importJSON(paths[i]);
+	}
+}
 
 function sendUpdatePoints() {
 	if (!updatePoints.length) return;
@@ -54,4 +62,5 @@ function onMouseDrag(e) {
 function onMouseUp(e) {
 	clearInterval(updateTimer);
 	sendUpdatePoints();
+	socket.emit('drawFinish', path);
 }
