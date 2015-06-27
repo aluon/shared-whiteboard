@@ -8,8 +8,7 @@ socket.on('connect', function () {
 });
 
 $('#roomSelector').change(function () {
-	project.clear();
-	view.update();
+	clearProject();
 	socket.emit('joinRoom', this.value);
 	socket.emit('pathsNeeded');
 });
@@ -21,6 +20,18 @@ socket.on('pathsNeeded', function (paths) {
 	}
 	view.update();
 });
+
+$('#clearProjectButton').click(function () {
+	clearProject();
+	socket.emit('clearProject');
+});
+
+socket.on('clearProject', clearProject);
+
+function clearProject() {
+	project.clear();
+	view.update();
+}
 
 var foreignPath;
 
@@ -38,7 +49,6 @@ socket.on('drawUpdate', function (points) {
 var path;
 var updatePoints = [];
 var updateTimer;
-
 
 function sendUpdatePoints() {
 	if (!updatePoints.length) return;

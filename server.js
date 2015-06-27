@@ -2,7 +2,7 @@ var express = require('express');
 var app = express();
 app.use(express.static('public'));
 
-var server = app.listen(8080);
+var server = app.listen(process.env.port || 8080);
 
 var paths = {};
 
@@ -24,9 +24,12 @@ io.on('connection', function (socket) {
 		paths[room].push(path);
 	});
 
+	socket.on('clearProject', function () {
+		socket.broadcast.to(room).emit('clearProject');
+	});
+
 	socket.on('pathsNeeded', function () {
-		console.log(paths[room]);
-		socket.emit(paths[room]);
+		socket.emit('pathsNeeded', paths[room]);
 	});
 
 	socket.on('joinRoom', function (id) {
