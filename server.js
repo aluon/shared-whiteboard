@@ -35,6 +35,7 @@ io.on('connection', function (socket) {
 	});
 
 	socket.on('clearProject', function () {
+		paths[room] = [];
 		socket.broadcast.to(room).emit('clearProject');
 	});
 
