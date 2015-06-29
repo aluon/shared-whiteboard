@@ -19,6 +19,7 @@ socket.on('drawStart', function (path) {
 });
 
 socket.on('drawUpdate', function (points) {
+	if (!foreignPath) return;
 	for (var i = 0; i < points.length; ++i) {
 		foreignPath.add(new Point(points[i]));
 	}
@@ -43,6 +44,7 @@ $('#undoButton').click(function () {
 $('#clearProjectButton').click(sendClearProject);
 
 function clearProject() {
+	path = foreignPath = null;
 	project.clear();
 	view.update();
 }
