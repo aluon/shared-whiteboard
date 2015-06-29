@@ -25,8 +25,8 @@ socket.on('drawUpdate', function (points) {
 	view.update();
 });
 
-socket.on('joinRoom', function (paths) {
-	if (!paths) return;
+socket.on('pathsLoaded', function (paths) {
+	project.clear();
 	for (var i = 0; i < paths.length; ++i) {
 		new Path().importJSON(paths[i]);
 	}
@@ -35,18 +35,19 @@ socket.on('joinRoom', function (paths) {
 
 $('#roomSelector').change(joinRoom);
 
-$('#clearProjectButton').click(function () {
-	clearProject();
-	socket.emit('clearProject');
+$('#undoButton').click(function () {
+	socket.emit('undo');
 });
+
+$('#clearProjectButton').click(clearProject);
 
 function clearProject() {
 	project.clear();
 	view.update();
+	socket.emit('clearProject');
 }
 
 function joinRoom() {
-	clearProject();
 	socket.emit('joinRoom', $('#roomSelector').val());
 }
 
