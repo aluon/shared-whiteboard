@@ -2,40 +2,17 @@ var socket = io('http://localhost:8080');
 
 tool.minDistance = 5;
 
+var path;
+var foreignPath;
+var updatePoints = [];
+var updateTimer;
+
 socket.on('connect', function () {
 	console.log('connected to whiteboard server');
 	joinRoom();
 });
 
-
-$('#roomSelector').change(joinRoom);
-
-socket.on('joinRoom', function (paths) {
-	if (!paths) return;
-	for (var i = 0; i < paths.length; ++i) {
-		new Path().importJSON(paths[i]);
-	}
-	view.update();
-});
-
-$('#clearProjectButton').click(function () {
-	clearProject();
-	socket.emit('clearProject');
-});
-
 socket.on('clearProject', clearProject);
-
-function clearProject() {
-	project.clear();
-	view.update();
-}
-
-function joinRoom() {
-	clearProject();
-	socket.emit('joinRoom', $('#roomSelector').val());
-}
-
-var foreignPath;
 
 socket.on('drawStart', function (path) {
 	foreignPath = new Path().importJSON(path);
@@ -48,9 +25,30 @@ socket.on('drawUpdate', function (points) {
 	view.update();
 });
 
-var path;
-var updatePoints = [];
-var updateTimer;
+socket.on('joinRoom', function (paths) {
+	if (!paths) return;
+	for (var i = 0; i < paths.length; ++i) {
+		new Path().importJSON(paths[i]);
+	}
+	view.update();
+});
+
+$('#roomSelector').change(joinRoom);
+
+$('#clearProjectButton').click(function () {
+	clearProject();
+	socket.emit('clearProject');
+});
+
+function clearProject() {
+	project.clear();
+	view.update();
+}
+
+function joinRoom() {
+	clearProject();
+	socket.emit('joinRoom', $('#roomSelector').val());
+}
 
 function sendUpdatePoints() {
 	if (!updatePoints.length) return;

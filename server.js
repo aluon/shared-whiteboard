@@ -21,6 +21,14 @@ io.on('connection', function (socket) {
 	var room = socket.id;
 	console.log('client connected to room %s', room);
 
+	socket.on('joinRoom', function (id) {
+		socket.leave(room);
+		room = id || socket.id;
+		console.log('client %s moved to room %s', socket.id, room);
+		socket.join(room);
+		socket.emit('joinRoom', paths[room]);
+	});
+
 	socket.on('drawStart', function (path) {
 		socket.broadcast.to(room).emit('drawStart', path);
 	});
@@ -37,13 +45,5 @@ io.on('connection', function (socket) {
 	socket.on('clearProject', function () {
 		paths[room] = [];
 		socket.broadcast.to(room).emit('clearProject');
-	});
-
-	socket.on('joinRoom', function (id) {
-		socket.leave(room);
-		room = id || socket.id;
-		console.log('client %s moved to room %s', socket.id, room);
-		socket.join(room);
-		socket.emit('joinRoom', paths[room]);
 	});
 });
