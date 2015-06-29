@@ -1,6 +1,16 @@
 var express = require('express');
 var app = express();
+
+app.set('views', 'views');
+app.set('view engine', 'ejs');
 app.use(express.static('public'));
+
+app.get('/:room?', function (req, res) {
+	var room = req.params.room;
+	res.render('index', {
+		room: room
+	});
+});
 
 var server = app.listen(process.env.port || 8080);
 
@@ -28,13 +38,11 @@ io.on('connection', function (socket) {
 		socket.broadcast.to(room).emit('clearProject');
 	});
 
-	socket.on('pathsNeeded', function () {
-		socket.emit('pathsNeeded', paths[room]);
-	});
-
 	socket.on('joinRoom', function (id) {
 		socket.leave(room);
 		room = id || socket.id;
+		console.log('client %s moved to room %s', socket.id, room);
 		socket.join(room);
+		socket.emit('joinRoom', paths[room]);
 	});
 });
