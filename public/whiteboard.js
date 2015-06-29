@@ -27,6 +27,8 @@ socket.on('drawUpdate', function (points) {
 
 socket.on('pathsLoaded', function (paths) {
 	project.clear();
+	view.update();
+	if (!paths) return;
 	for (var i = 0; i < paths.length; ++i) {
 		new Path().importJSON(paths[i]);
 	}
