@@ -1,13 +1,17 @@
 var express = require('express');
-var app = express();
+var nunjucks = require('nunjucks');
 
-app.set('views', 'views');
-app.set('view engine', 'ejs');
+var app = express();
 app.use(express.static('public'));
+
+nunjucks.configure('views', {
+    autoescape: true,
+    express: app
+});
 
 app.get('/:room?', function (req, res) {
 	var room = req.params.room;
-	res.render('index', {
+	res.render('index.html', {
 		room: room
 	});
 });
