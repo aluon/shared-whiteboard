@@ -125,10 +125,34 @@ brushTool.onMouseUp = function (e) {
 	socket.emit('drawFinish', path);
 };
 
+
 selectTool.onMouseDown = function (e) {
-	var hitResult = project.hitTest(e.point);
-	if (!hitResult) return;
-	selectTool.path = hitResult.item;
+	var hitOptions = {
+		tolerance: 5,
+		bounds: true
+	};
+
+	var hitResult = project.hitTest(e.point, hitOptions);
+	if (!hitResult) {
+		return;
+	}
+	selectTool.path = selectTool.raster = null;
+
+	var type = hitResult.type;
+	console.log(type);
+	if (type == 'fill' || type == 'pixel') {
+		selectTool.path = hitResult.item;
+	} else if (type == 'bounds') {
+		selectTool.raster = hitResult.item;
+		selectTool.initialDistance = e.point.getDistance(selectTool.raster.center);
+	}
+};
+
+selectTool.onMouseMove = function (e) {
+	project.activeLayer.selected = false;
+	if (e.item) {
+		e.item.selected = true;
+	}
 };
 
 selectTool.onMouseDrag = function (e) {
@@ -136,7 +160,12 @@ selectTool.onMouseDrag = function (e) {
 	if (path) {
 		path.position += e.delta;
 	}
+
+	var raster = selectTool.raster;
+	if (raster) {
+		var distance = e.point.getDistance(raster.center);
+		raster.scale(selectTool.initialDistance / distance);
+	}
 };
 
-selectTool.onMouseUp = function (e) {
-};
+selectTool.onMouseUp = function (e) {};
