@@ -33,14 +33,14 @@ io.on('connection', function (socket) {
 		socket.emit('itemsLoaded', items[room]);
 	});
 
-	socket.on('updateItem', function (name, item) {
-		var items = items[room];
-		for (var i = 0; i < items.length; ++i) {
-			if (items[1].name === item.name) {
-				items[1] = item;
+	socket.on('itemUpdate', function (item) {
+		for (var i = 0; i < items[room].length; ++i) {
+			if (items[room][i][1].name === item[1].name) {
+				items[room][i] = item;
+				break;
 			}
 		}
-		socket.broadcast.to(room).emit('itemUpdate', name, item);
+		socket.broadcast.to(room).emit('itemUpdate', item);
 	});
 
 	socket.on('drawStart', function (path) {
@@ -56,15 +56,15 @@ io.on('connection', function (socket) {
 		items[room].push(path);
 	});
 
-	socket.on('addRaster', function (raster) {
+	socket.on('rasterAdd', function (raster) {
 		items[room] = items[room] || [];
 		items[room].push(raster);
-		socket.broadcast.to(room).emit('addRaster', raster);
+		socket.broadcast.to(room).emit('rasterAdd', raster);
 	});
 
-	socket.on('clearProject', function () {
+	socket.on('projectClear', function () {
 		items[room] = [];
-		socket.broadcast.to(room).emit('clearProject');
+		socket.broadcast.to(room).emit('projectClear');
 	});
 
 	socket.on('undo', function () {

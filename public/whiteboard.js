@@ -2,7 +2,7 @@ var socket = io('http://localhost:8080');
 
 var path;
 var foreignPath;
-var updatePoints = [];
+var updateSegments = [];
 var updateTimer;
 
 socket.on('connect', function () {
@@ -10,7 +10,7 @@ socket.on('connect', function () {
 	joinRoom();
 });
 
-socket.on('clearProject', clearProject);
+socket.on('projectClear', clearProject);
 
 socket.on('drawStart', function (path) {
 	foreignPath = new Path().importJSON(path);
@@ -33,11 +33,11 @@ socket.on('itemsLoaded', function (items) {
 	view.update();
 });
 
-socket.on('itemUpdated', function (name, item) {
-	project.activeLayer[name] = item;
+socket.on('itemUpdate', function (item) {
+	project.activeLayer[item.name] = parseItem(item);
 });
 
-socket.on('addRaster', function (raster) {
+socket.on('rasterAdd', function (raster) {
 	new Raster().importJSON(raster);
 	view.update();
 });
@@ -54,7 +54,8 @@ $('#imageInput').change(function () {
 	var reader = new FileReader();
 	reader.onloadend = function () {
 		var raster = new Raster(reader.result);
-		socket.emit('addRaster', raster);
+		raster.name = generateName();
+		socket.emit('rasterAdd', raster);
 	};
 
 	var file = this.files[0];
@@ -100,15 +101,27 @@ function sendClearProject() {
 	socket.emit('clearProject');
 }
 
-function sendUpdatePoints() {
-	if (!updatePoints.length) return;
-	socket.emit('drawUpdate', updatePoints);
-	updatePoints = [];
+function sendUpdateSegments() {
+	if (!updateSegments.length) return;
+	socket.emit('drawUpdate', updateSegments);
+	updateSegments = [];
+}
+
+function generateName() {
+	return 'item' + new Date().getUTCMilliseconds();
+}
+
+function parseItem(item) {
+	if (item[0] == "Raster") {
+		return new Raster().importJSON(item);
+	} else {
+		return new Item().importJSON(item);
+	}
 }
 
 brushTool.onMouseDown = function (e) {
 	path = new Path();
-	path.name = 'item' + new Date().getUTCMilliseconds();
+	path.name = generateName();
 	if ($('#toolSelector').val() === "brush") {
 		path.strokeColor = $('#colorSelector').val();
 	} else {
@@ -120,18 +133,18 @@ brushTool.onMouseDown = function (e) {
 	path.smooth();
 
 	socket.emit('drawStart', path);
-	updateTimer = setInterval(sendUpdatePoints, 10);
+	updateTimer = setInterval(sendUpdateSegments, 10);
 };
 
 brushTool.onMouseDrag = function (e) {
 	path.add(e.point);
-	updatePoints.push([e.point.x, e.point.y]);
+	updateSegments.push([e.point.x, e.point.y]);
 	path.smooth();
 };
 
 brushTool.onMouseUp = function (e) {
 	clearInterval(updateTimer);
-	sendUpdatePoints();
+	sendUpdateSegments();
 	socket.emit('drawFinish', path);
 };
 
@@ -182,4 +195,8 @@ selectTool.onMouseDrag = function (e) {
 	}
 };
 
-selectTool.onMouseUp = function (e) {};
+selectTool.onMouseUp = function (e) {
+	if (!selectTool.hitResult) return;
+	console.log(selectTool.hitResult.item);
+	socket.emit('itemUpdate', selectTool.hitResult.item);
+};
