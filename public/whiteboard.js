@@ -79,6 +79,7 @@ function sendUpdatePoints() {
 
 function changeTool() {
 	var name = $('#toolSelector').val();
+	project.deselectAll();
 	var tool;
 	switch (name) {
 		case 'brush':
@@ -86,6 +87,7 @@ function changeTool() {
 			break;
 		case 'select':
 			tool = selectTool;
+			project.selectAll();
 			break;
 		default:
 			tool = brushTool;
@@ -125,21 +127,22 @@ brushTool.onMouseUp = function (e) {
 	socket.emit('drawFinish', path);
 };
 
+var hitOptions = {
+	tolerance: 5,
+	bounds: true
+};
 
 selectTool.onMouseDown = function (e) {
-	var hitOptions = {
-		tolerance: 5,
-		bounds: true
-	};
-
 	selectTool.hitResult = project.hitTest(e.point, hitOptions);
 };
 
 selectTool.onMouseMove = function (e) {
+	/*
 	project.activeLayer.selected = false;
 	if (e.item) {
 		e.item.selected = true;
 	}
+	*/
 };
 
 selectTool.onMouseDrag = function (e) {
@@ -147,23 +150,24 @@ selectTool.onMouseDrag = function (e) {
 	var type = selectTool.hitResult.type;
 	var name = selectTool.hitResult.name;
 	var item = selectTool.hitResult.item;
+	var bounds = item.bounds;
 	if (type == 'bounds') {
-		if  (name == 'top-left') {
-			item.bounds.topLeft = e.point;
+		if (name == 'top-left') {
+			bounds.topLeft = e.point;
 		} else if (name == 'top-right') {
-			item.bounds.topRight = e.point;
+			bounds.topRight = e.point;
 		} else if (name == 'bottom-left') {
-			item.bounds.bottomLeft = e.point;
-		}  else if (name == 'bottom-right') {
-			item.bounds.bottomRight = e.point;
+			bounds.bottomLeft = e.point;
+		} else if (name == 'bottom-right') {
+			bounds.bottomRight = e.point;
 		} else if (name == 'left-center') {
-			item.bounds.leftCenter.x = e.point.x;
+			bounds.leftCenter.x = e.point.x;
 		} else if (name == 'top-center') {
-			item.bounds.topCenter.y = e.point.y;
+			bounds.topCenter.y = e.point.y;
 		} else if (name == 'right-center') {
-			item.bounds.rightCenter.x = e.point.x;
+			bounds.rightCenter.x = e.point.x;
 		} else if (name == 'bottom-center') {
-			item.bounds.bottomCenter.y = e.point.y;
+			bounds.bottomCenter.y = e.point.y;
 		}
 	} else {
 		item.position = e.point;
