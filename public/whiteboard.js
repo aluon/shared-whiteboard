@@ -139,12 +139,12 @@ selectTool.onMouseDown = function (e) {
 	selectTool.path = selectTool.raster = null;
 
 	var type = hitResult.type;
-	console.log(type);
+	var item = hitResult.item;
 	if (type == 'fill' || type == 'pixel') {
-		selectTool.path = hitResult.item;
+		selectTool.path = item;
 	} else if (type == 'bounds') {
-		selectTool.raster = hitResult.item;
-		selectTool.initialDistance = e.point.getDistance(selectTool.raster.center);
+		selectTool.raster = item;
+		selectTool.initialDistance = e.point.getDistance(item.bounds.center);
 	}
 };
 
@@ -163,8 +163,8 @@ selectTool.onMouseDrag = function (e) {
 
 	var raster = selectTool.raster;
 	if (raster) {
-		var distance = e.point.getDistance(raster.center);
-		raster.scale(selectTool.initialDistance / distance);
+		var distance = e.point.getDistance(raster.bounds.center);
+		raster.scale(distance / selectTool.initialDistance);
 	}
 };
 
