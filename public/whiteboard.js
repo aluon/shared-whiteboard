@@ -132,20 +132,7 @@ selectTool.onMouseDown = function (e) {
 		bounds: true
 	};
 
-	var hitResult = project.hitTest(e.point, hitOptions);
-	if (!hitResult) {
-		return;
-	}
-	selectTool.path = selectTool.raster = null;
-
-	var type = hitResult.type;
-	var item = hitResult.item;
-	if (type == 'fill' || type == 'pixel') {
-		selectTool.path = item;
-	} else if (type == 'bounds') {
-		selectTool.raster = item;
-		selectTool.initialDistance = e.point.getDistance(item.bounds.center);
-	}
+	selectTool.hitResult = project.hitTest(e.point, hitOptions);
 };
 
 selectTool.onMouseMove = function (e) {
@@ -156,15 +143,30 @@ selectTool.onMouseMove = function (e) {
 };
 
 selectTool.onMouseDrag = function (e) {
-	var path = selectTool.path;
-	if (path) {
-		path.position += e.delta;
-	}
-
-	var raster = selectTool.raster;
-	if (raster) {
-		var distance = e.point.getDistance(raster.bounds.center);
-		raster.scale(distance / selectTool.initialDistance);
+	if (!selectTool.hitResult) return;
+	var type = selectTool.hitResult.type;
+	var name = selectTool.hitResult.name;
+	var item = selectTool.hitResult.item;
+	if (type == 'bounds') {
+		if  (name == 'top-left') {
+			item.bounds.topLeft = e.point;
+		} else if (name == 'top-right') {
+			item.bounds.topRight = e.point;
+		} else if (name == 'bottom-left') {
+			item.bounds.bottomLeft = e.point;
+		}  else if (name == 'bottom-right') {
+			item.bounds.bottomRight = e.point;
+		} else if (name == 'left-center') {
+			item.bounds.leftCenter.x = e.point.x;
+		} else if (name == 'top-center') {
+			item.bounds.topCenter.y = e.point.y;
+		} else if (name == 'right-center') {
+			item.bounds.rightCenter.x = e.point.x;
+		} else if (name == 'bottom-center') {
+			item.bounds.bottomCenter.y = e.point.y;
+		}
+	} else {
+		item.position = e.point;
 	}
 };
 
