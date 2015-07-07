@@ -43,6 +43,19 @@ $('#clearProjectButton').click(sendClearProject);
 
 $('#toolSelector').change(changeTool);
 
+$('#imageInput').change(function () {
+	var reader = new FileReader();
+
+	reader.onloadend = function () {
+		new Raster(reader.result);
+	};
+
+	var file = this.files[0];
+	if (file) {
+		reader.readAsDataURL(file);
+	}
+});
+
 function clearProject() {
 	path = foreignPath = null;
 	project.clear();
