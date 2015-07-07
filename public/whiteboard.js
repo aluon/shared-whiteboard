@@ -24,13 +24,17 @@ socket.on('drawUpdate', function (points) {
 	view.update();
 });
 
-socket.on('pathsLoaded', function (paths) {
+socket.on('itemsLoaded', function (items) {
 	clearProject();
-	if (!paths) return;
-	for (var i = 0; i < paths.length; ++i) {
-		new Item().importJSON(paths[i]);
+	if (!items) return;
+	for (var i = 0; i < items.length; ++i) {
+		new Item().importJSON(items[i]);
 	}
 	view.update();
+});
+
+socket.on('itemUpdated', function (name, item) {
+	project.activeLayer[name] = item;
 });
 
 $('#roomSelector').change(joinRoom);
@@ -41,11 +45,8 @@ $('#undoButton').click(function () {
 
 $('#clearProjectButton').click(sendClearProject);
 
-$('#toolSelector').change(changeTool);
-
 $('#imageInput').change(function () {
 	var reader = new FileReader();
-
 	reader.onloadend = function () {
 		new Raster(reader.result);
 	};
@@ -55,6 +56,28 @@ $('#imageInput').change(function () {
 		reader.readAsDataURL(file);
 	}
 });
+
+var brushTool = new Tool();
+var selectTool = new Tool();
+
+$('#toolSelector').change(function () {
+	var name = this.value;
+	project.deselectAll();
+	var tool;
+	switch (name) {
+		case 'brush':
+			tool = brushTool;
+			break;
+		case 'select':
+			tool = selectTool;
+			project.selectAll();
+			break;
+		default:
+			tool = brushTool;
+	}
+	tool.activate();
+	tool.minDistance = 5;
+}).trigger('change');
 
 function clearProject() {
 	path = foreignPath = null;
@@ -77,30 +100,9 @@ function sendUpdatePoints() {
 	updatePoints = [];
 }
 
-function changeTool() {
-	var name = $('#toolSelector').val();
-	project.deselectAll();
-	var tool;
-	switch (name) {
-		case 'brush':
-			tool = brushTool;
-			break;
-		case 'select':
-			tool = selectTool;
-			project.selectAll();
-			break;
-		default:
-			tool = brushTool;
-	}
-	tool.activate();
-	tool.minDistance = 5;
-}
-
-var brushTool = new Tool();
-var selectTool = new Tool();
-
 brushTool.onMouseDown = function (e) {
 	path = new Path();
+	path.name = 'item' + new Date().getUTCMilliseconds();
 	if ($('#toolSelector').val() === "brush") {
 		path.strokeColor = $('#colorSelector').val();
 	} else {

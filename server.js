@@ -18,7 +18,7 @@ app.get('/:room?', function (req, res) {
 
 var server = app.listen(process.env.port || 8080);
 
-var paths = {};
+var items = {};
 
 var io = require('socket.io').listen(server);
 io.on('connection', function (socket) {
@@ -30,7 +30,17 @@ io.on('connection', function (socket) {
 		room = id || socket.id;
 		console.log('client %s moved to room %s', socket.id, room);
 		socket.join(room);
-		socket.emit('pathsLoaded', paths[room]);
+		socket.emit('itemsLoaded', items[room]);
+	});
+
+	socket.on('updateItem', function (name, item) {
+		var items = items[room];
+		for (var i = 0; i < items.length; ++i) {
+			if (items[1].name === item.name) {
+				items[1] = item;
+			}
+		}
+		socket.broadcast.to(room).emit('itemUpdate', name, item);
 	});
 
 	socket.on('drawStart', function (path) {
@@ -42,17 +52,21 @@ io.on('connection', function (socket) {
 	});
 
 	socket.on('drawFinish', function (path) {
-		paths[room] = paths[room] || [];
-		paths[room].push(path);
+		items[room] = items[room] || [];
+		items[room].push(path);
+	});
+
+	socket.on('addRaster', function (raster) {
+		items[room].push(raster);
 	});
 
 	socket.on('clearProject', function () {
-		paths[room] = [];
+		items[room] = [];
 		socket.broadcast.to(room).emit('clearProject');
 	});
 
 	socket.on('undo', function () {
-		paths[room].pop();
-		socket.emit('pathsLoaded', paths[room]);
+		items[room].pop();
+		socket.emit('pathsLoaded', items[room]);
 	});
 });
