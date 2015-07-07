@@ -111,3 +111,19 @@ brushTool.onMouseUp = function (e) {
 	sendUpdatePoints();
 	socket.emit('drawFinish', path);
 };
+
+selectTool.onMouseDown = function (e) {
+	var hitResult = project.hitTest(e.point);
+	if (!hitResult) return;
+	selectTool.path = hitResult.item;
+};
+
+selectTool.onMouseDrag = function (e) {
+	var path = selectTool.path;
+	if (path) {
+		path.position += e.delta;
+	}
+};
+
+selectTool.onMouseUp = function (e) {
+};
