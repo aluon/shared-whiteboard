@@ -57,7 +57,9 @@ io.on('connection', function (socket) {
 	});
 
 	socket.on('addRaster', function (raster) {
+		items[room] = items[room] || [];
 		items[room].push(raster);
+		socket.broadcast.to(room).emit('addRaster', raster);
 	});
 
 	socket.on('clearProject', function () {

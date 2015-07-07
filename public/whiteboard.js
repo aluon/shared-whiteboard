@@ -37,6 +37,11 @@ socket.on('itemUpdated', function (name, item) {
 	project.activeLayer[name] = item;
 });
 
+socket.on('addRaster', function (raster) {
+	new Raster().importJSON(raster);
+	view.update();
+});
+
 $('#roomSelector').change(joinRoom);
 
 $('#undoButton').click(function () {
@@ -48,7 +53,8 @@ $('#clearProjectButton').click(sendClearProject);
 $('#imageInput').change(function () {
 	var reader = new FileReader();
 	reader.onloadend = function () {
-		new Raster(reader.result);
+		var raster = new Raster(reader.result);
+		socket.emit('addRaster', raster);
 	};
 
 	var file = this.files[0];
