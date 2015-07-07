@@ -28,7 +28,7 @@ socket.on('itemsLoaded', function (items) {
 	clearProject();
 	if (!items) return;
 	for (var i = 0; i < items.length; ++i) {
-		new Item().importJSON(items[i]);
+		parseItem(items[i]);
 	}
 	view.update();
 });
