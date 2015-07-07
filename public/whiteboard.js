@@ -1,7 +1,5 @@
 var socket = io('http://localhost:8080');
 
-tool.minDistance = 5;
-
 var path;
 var foreignPath;
 var updatePoints = [];
@@ -30,7 +28,7 @@ socket.on('pathsLoaded', function (paths) {
 	clearProject();
 	if (!paths) return;
 	for (var i = 0; i < paths.length; ++i) {
-		new Path().importJSON(paths[i]);
+		new Item().importJSON(paths[i]);
 	}
 	view.update();
 });
@@ -42,6 +40,8 @@ $('#undoButton').click(function () {
 });
 
 $('#clearProjectButton').click(sendClearProject);
+
+$('#toolSelector').change(changeTool);
 
 function clearProject() {
 	path = foreignPath = null;
@@ -64,7 +64,27 @@ function sendUpdatePoints() {
 	updatePoints = [];
 }
 
-function onMouseDown(e) {
+function changeTool() {
+	var name = $('#toolSelector').val();
+	var tool;
+	switch (name) {
+		case 'brush':
+			tool = brushTool;
+			break;
+		case 'select':
+			tool = selectTool;
+			break;
+		default:
+			tool = brushTool;
+	}
+	tool.activate();
+	tool.minDistance = 5;
+}
+
+var brushTool = new Tool();
+var selectTool = new Tool();
+
+brushTool.onMouseDown = function (e) {
 	path = new Path();
 	if ($('#toolSelector').val() === "brush") {
 		path.strokeColor = $('#colorSelector').val();
@@ -78,16 +98,16 @@ function onMouseDown(e) {
 
 	socket.emit('drawStart', path);
 	updateTimer = setInterval(sendUpdatePoints, 10);
-}
+};
 
-function onMouseDrag(e) {
+brushTool.onMouseDrag = function (e) {
 	path.add(e.point);
 	updatePoints.push([e.point.x, e.point.y]);
 	path.smooth();
-}
+};
 
-function onMouseUp(e) {
+brushTool.onMouseUp = function (e) {
 	clearInterval(updateTimer);
 	sendUpdatePoints();
 	socket.emit('drawFinish', path);
-}
+};
