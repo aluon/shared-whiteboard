@@ -3,7 +3,10 @@ var socket = io('http://localhost:8080');
 var path;
 var foreignPath;
 var updateSegments = [];
-var updateTimer;
+var sendSegmentsTimer;
+var sendMovesTimer;
+var sendResizesTimer;
+var updateInterval = 25;
 
 socket.on('connect', function () {
 	console.log('connected to whiteboard server');
@@ -133,7 +136,7 @@ brushTool.onMouseDown = function (e) {
 	path.smooth();
 
 	socket.emit('drawStart', path);
-	updateTimer = setInterval(sendUpdateSegments, 10);
+	sendSegmentsTimer = setInterval(sendUpdateSegments, updateInterval);
 };
 
 brushTool.onMouseDrag = function (e) {
@@ -143,7 +146,7 @@ brushTool.onMouseDrag = function (e) {
 };
 
 brushTool.onMouseUp = function (e) {
-	clearInterval(updateTimer);
+	clearInterval(sendSegmentsTimer);
 	sendUpdateSegments();
 	socket.emit('drawFinish', path);
 };
